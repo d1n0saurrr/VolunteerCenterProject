@@ -1,0 +1,76 @@
+{{ define "index" }}
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="https://stackpath.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" type="text/css" />
+    <link href="/static/css/main.css" rel="stylesheet">
+
+    <script>
+        function clickOnRow(id){
+            document.getElementById("save_button" + id).hidden = false;
+        }
+        function handleClick(id){
+            fetch("http://localhost:8080/getuser/"+id)
+                .then((res)=>res.json())
+                .then((res)=>switchPage(res))
+                .catch((err)=>console.log(err));
+        }
+        function switchPage(data){
+            document.getElementById("fname"+data.Id).style.display = 'none';
+            document.getElementById("lname"+data.Id).style.display = 'none';
+            document.getElementById("main-page"+data.Id).innerHTML=`
+<!--<div class="left"><button onclick="handleBackButton()">back</button></div>-->
+<div class="right"><form name="change" action="http://localhost:8080/user/${data.Id}/change" method="post">
+  <p><input type="text" id="fname" name="fname" value=${data.FirstName}>
+  <input type="text" id="lname" name="lname" value=${data.LastName}>
+  <input type="submit" value="submit"></p>
+</form></div>`
+        }
+    </script>
+
+</head>
+
+<header class="p-3 bg-dark text-white">
+    <div class="container">
+        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+            <li><a href="#" class="nav-link px-2 text-secondary">Главная</a></li>
+            <li><a href="#" class="nav-link px-2 text-white">Список</a></li>
+        </ul>
+    </div>
+</header>
+
+<body>
+    <title>Волонтерский центр</title>
+    <div id="main-paage" class="left container">
+        <table>
+            {{ range . }}
+                <!--<tr id="main-page{{ .Id }}" onclick="handleClick('{{ .Id}}')">
+                    <td> {{ .Id }} </td>
+                    <td id="fname{{ .Id }}"> {{ .FirstName }} </td>
+                    <td id="lname{{ .Id }}"> {{ .LastName }} </td>
+                </tr>-->
+            <tr onclick="clickOnRow('{{ .Id}}')">
+                <td> {{ .Id }} </td>
+                <td>
+                    <form action="http://localhost:8080/user/{{ .Id }}/change" method="post">
+                        <input type="text" name="fname" value="{{ .FirstName }}">
+                        <input type="text" name="lname" value="{{ .LastName }}">
+                        <input hidden id="save_button{{ .Id }}" type="submit" value="Изменить">
+                    </form>
+                </td>
+            </tr>
+            {{ end }}
+        </table>
+    </div>
+</body>
+
+</html>
+
+{{ end }}
