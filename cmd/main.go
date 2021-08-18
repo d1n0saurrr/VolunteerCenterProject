@@ -12,7 +12,6 @@ import (
 )
 
 func main() {
-	//hundleFunc()
 	if err := initConfig(); err != nil {
 		log.Fatalf("error initializing configs: %s", err.Error())
 	}
