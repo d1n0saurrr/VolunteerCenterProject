@@ -1,12 +1,20 @@
 package main
 
 import (
+	"VolunteerCenter"
+	"VolunteerCenter/pkg/handler"
+	"VolunteerCenter/pkg/repository"
+	"VolunteerCenter/pkg/service"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/spf13/viper"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"text/template"
 )
@@ -180,6 +188,3 @@ func hundleFunc() {
 	}
 }
 
-func main() {
-	hundleFunc()
-}
