@@ -1,0 +1,51 @@
+{{ define "registerVol" }}
+
+{{ template "header" }}
+
+<title>Регистрация</title>
+
+<body>
+<form style="margin-top: 10%; margin-left: 40%; width: 300px">
+    <!-- 2 column grid layout with text inputs for the first and last names -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="form-outline">
+                <input type="text" name="fname" class="form-control" />
+                <label class="form-label">Фамилия</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-outline">
+                <input type="text" name="lname" class="form-control" />
+                <label class="form-label">Имя</label>
+            </div>
+        </div>
+    </div>
+    <div class="form-outline mb-4">
+        <input type="text" name="patronymic" class="form-control" />
+        <label class="form-label">Отчество</label>
+    </div>
+    <div class=" mb-4">
+        <input type="date">
+    </div>
+
+    <!-- Email input -->
+    <div class="form-outline mb-4">
+        <input type="email" name="email" class="form-control" />
+        <label class="form-label">Email address</label>
+    </div>
+
+    <!-- Password input -->
+    <div class="form-outline mb-4">
+        <input type="password" id="password" class="form-control" />
+        <label class="form-label">Password</label>
+    </div>
+
+    <!-- Submit button -->
+    <button type="submit" class="btn btn-primary btn-block mb-4">Sign up</button>
+</form>
+</body>
+
+</html>
+
+{{ end }}

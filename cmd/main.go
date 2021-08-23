@@ -2,9 +2,9 @@ package main
 
 import (
 	"VolunteerCenter"
-	"VolunteerCenter/pkg/handler"
 	"VolunteerCenter/pkg/repository"
 	"VolunteerCenter/pkg/service"
+	"VolunteerCenter/pkg/webHandler"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
@@ -37,11 +37,12 @@ func main() {
 	}
 
 	repos := repository.NewRepository(db)
-	servives := service.NewService(repos)
-	handlers := handler.NewHandler(servives)
+	services := service.NewService(repos)
+	//handlers := handler.NewHandler(services)
+	webHandlers := webHandler.NewWebHandler(services)
 	srv := new(VolunteerCenter.Server)
 
-	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+	if err := srv.Run(viper.GetString("port"), webHandlers.InitRoutes()); err != nil {
 		logrus.Fatalf("error occured while running http server: %s", err.Error())
 	}
 }

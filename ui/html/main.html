@@ -1,0 +1,33 @@
+{{ define "main" }}
+
+{{ template "header" }}
+
+<title>Волонтерский центр</title>
+<body>
+  <!-- Background image -->
+  <div
+          class="p-5 text-center bg-image"
+          style="
+        background-image: url(static/img/mainPage.png);
+        width: 100%;
+        height: 1080px;
+      "
+  >
+    <div class="mask" style="background-color: rgba(0, 0, 0, 0.4);">
+        <div class="d-flex justify-content-center align-items-center h-100">
+            <div class="text-white">
+                <a class="btn btn-outline-light btn-lg" href="/auth/sign-up" role="button"
+                >Стань частью нашей команды!</a>
+            </div>
+        </div>
+    </div>
+  </div><br><br>
+  <!-- Background image -->
+  <h1 class="text-center">Добро пожаловать!</h1>
+  <p class="text-center">Это сайт волонтерского центра. В нем вы можете стать частью нашей команды, просматривать список будущих мероприятий и записываться на них!</p>
+  <p class="text-center">Также при регистрации будет доступен личный кабинет, где вы можете просматривать мероприятия, в которых участвовали.</p>
+</body>
+
+</html>
+
+{{ end }}

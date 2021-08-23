@@ -1,3 +1,11 @@
+body {
+    background: red;
+}
+
+h1 {
+    color: #0a47a9;
+}
+
 table {
     border: 1px solid #69c;
 }

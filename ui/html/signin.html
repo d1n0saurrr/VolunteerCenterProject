@@ -1,0 +1,57 @@
+{{ define "signin" }}
+
+{{ template "header" }}
+
+<title>Авторизация</title>
+
+<script>
+    function signIn() {
+        /*console.log("/auth/sign-up?name=" + document.getElementById('name').value + "&username=" + document.getElementById('username').value
+            + "&password=" + document.getElementById('password').value)*/
+        /*fetch("", {
+            Body:
+        })*/
+        /*fetch("/auth/sign-in?username=" + document.getElementById('username').value + "&password=" + document.getElementById('password').value,
+            {
+                method: 'POST'
+            })
+            .then(response=>console.log(response.body))
+            /!*.then(data => {
+                auth.setToken(data.token)
+            })*!/
+            .catch(console.error)*/
+        let formData = new FormData();
+        formData.append('username', document.getElementById('username').value);
+        formData.append('password', document.getElementById('password').value);
+
+        fetch("/auth/sign-in", {
+                method: 'post',
+                body: formData
+            })
+            .then((res) => res.json())
+            .then(data => auth.setToken(data["token"]))
+
+        auth.fetch("/user/info", {
+            method: 'get'
+        }).then(location.replace("/user/info"))
+    }
+</script>
+
+<body>
+<form style="margin-top: 10%; margin-left: 40%; width: 300px"
+    action="/auth/sign-in" method="post">
+    <div class="mb-4">
+        <label class="form-label">Username</label>
+        <input type="text" id="username" name="username" class="form-control" />
+    </div>
+    <div class="mb-4">
+        <label class="form-label">Пароль</label>
+        <input type="password" id="password" name="password" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary btn-block mb-4">Sign up</button>
+</form>
+</body>
+
+</html>
+
+{{ end }}

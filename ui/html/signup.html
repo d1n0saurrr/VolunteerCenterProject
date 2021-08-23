@@ -1,0 +1,28 @@
+{{ define "signup" }}
+
+{{ template "header" }}
+
+<title>Регистрация</title>
+
+<body>
+<form style="margin-top: 10%; margin-left: 40%; width: 300px"
+    action="/auth/sign-up" method="post">
+    <div class="mb-4">
+        <label class="form-label">Имя</label>
+        <input type="text" id="name" name="name" class="form-control" />
+    </div>
+    <div class="mb-4">
+        <label class="form-label">Username</label>
+        <input type="text" id="username" name="username" class="form-control" />
+    </div>
+    <div class="mb-4">
+        <label class="form-label">Пароль</label>
+        <input type="password" id="password" name="password" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary btn-block mb-4">Sign up</button>
+</form>
+</body>
+
+</html>
+
+{{ end }}
