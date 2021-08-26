@@ -1,0 +1,35 @@
+{{ define "info" }}
+
+{{ template "header" }}
+
+<title>Информация о пользователе</title>
+
+<body>
+<form style="margin-top: 10%; margin-left: 40%; width: 300px"
+      action="/user/info" method="post">
+    <div class="mb-4">
+        <label class="form-label">Username</label>
+        <input readonly type="text" id="username" name="username" value="{{ .Username }}" class="form-control" />
+    </div>
+    <div class="mb-4">
+        <label class="form-label">Фамилия</label>
+        <input type="text" id="first_name" name="first_name" value="{{ .FirstName }}" class="form-control" />
+    </div>
+    <div class="mb-4">
+        <label class="form-label">Имя</label>
+        <input type="text" id="second_name" name="second_name" value="{{ .SecondName }}" class="form-control" />
+    </div>
+    <div class="mb-4">
+        <label class="form-label">Отчество</label>
+        <input type="text" id="patronymic" name="patronymic" value="{{ .Patronymic }}" class="form-control" />
+    </div>
+    <div class="mb-4">
+        <label class="form-label">Дата рождения</label>
+        <input type="date" id="birth_date" name="birth_date" value="{{ .BirthDate }}" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary btn-block mb-4">Изменить</button>
+</form>
+</body>
+</html>
+
+{{ end }}

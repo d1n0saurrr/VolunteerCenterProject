@@ -8,15 +8,42 @@ import (
 type Authorization interface {
 	CreateUser(user models.User) (int, error)
 	GenerateToken(username, password string) (string, error)
-	ParseToken(token string) (int, error)
+	ParseToken(token string) (int, bool, error)
+}
+
+type User interface {
+	GetById(id int) (models.User, error)
+	GetByUsername(username string) (models.User, error)
+	GetAll() ([]models.User, error)
+	SetVolId(userId, volId int) error
+}
+
+type Volunteer interface {
+	Create(volunteer models.Volunteer) (int, error)
+	Update(volunteer models.Volunteer) error
+	GetById(id int) (models.Volunteer, error)
+	GetAll() ([]models.Volunteer, error)
+}
+
+type Event interface {
+	Create(event models.Event) (int, error)
+	GetAll() ([]models.Event, error)
+	GetVolEvents(volId int) ([]models.Event, error)
+	RegisterVol(volId int, eventId int) error
 }
 
 type Service struct {
 	Authorization
+	User
+	Volunteer
+	Event
 }
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
+		User:          NewUserService(repos.User),
+		Volunteer:     NewVolService(repos.Volunteer),
+		Event:         NewEventService(repos.Event),
 	}
 }

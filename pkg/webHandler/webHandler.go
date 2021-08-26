@@ -7,10 +7,14 @@ import (
 
 type WebHandler struct {
 	services *service.Service
+	header   string
 }
 
 func NewWebHandler(services *service.Service) *WebHandler {
-	return &WebHandler{services: services}
+	return &WebHandler{
+		services: services,
+		header:   "ui/html/authHeader.html",
+	}
 }
 
 func (h *WebHandler) InitRoutes() *gin.Engine {
@@ -18,6 +22,7 @@ func (h *WebHandler) InitRoutes() *gin.Engine {
 	router.Static("/static/", "./ui/static/")
 
 	router.GET("/", h.mainPage)
+	router.GET("/sign-out", h.signOut)
 
 	auth := router.Group("/auth")
 	{
@@ -29,8 +34,8 @@ func (h *WebHandler) InitRoutes() *gin.Engine {
 
 	user := router.Group("/user", h.userIdentity)
 	{
-		user.GET("/info", h.userInfo)
-		user.POST("/info", h.userChange)
+		user.GET("/info", h.userInfoPage)
+		user.POST("/info", h.changeUserInfo)
 	}
 
 	events := router.Group("/events", h.userIdentity)
@@ -40,7 +45,7 @@ func (h *WebHandler) InitRoutes() *gin.Engine {
 		events.GET("/visited", h.getVisitedEvents)
 	}
 
-	admin := router.Group("/admin", h.userIdentity)
+	admin := router.Group("/admin", h.userIdentity, h.adminIdentity)
 	{
 		admin.GET("/", h.adminPage)
 

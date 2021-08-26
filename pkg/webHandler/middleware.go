@@ -8,6 +8,7 @@ import (
 const (
 	authorizationHeader = "Authorization"
 	userCtx             = "userId"
+	userAdmin           = "isAdmin"
 )
 
 func (h *WebHandler) userIdentity(c *gin.Context) {
@@ -22,11 +23,20 @@ func (h *WebHandler) userIdentity(c *gin.Context) {
 		return
 	}
 
-	userId, err := h.services.Authorization.ParseToken(token)
+	userId, isAdmin, err := h.services.Authorization.ParseToken(token)
 
 	if err != nil {
 		newErrorResponse(c, http.StatusUnauthorized, err.Error())
 	}
 
 	c.Set(userCtx, userId)
+	c.Set(userAdmin, isAdmin)
+}
+
+func (h *WebHandler) adminIdentity(c *gin.Context) {
+	isAdmin, ok := c.Get(userAdmin)
+
+	if !ok || !isAdmin.(bool) {
+		newErrorResponse(c, http.StatusBadGateway, "not admin")
+	}
 }
