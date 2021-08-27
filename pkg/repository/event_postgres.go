@@ -35,6 +35,38 @@ func (e EventPostgres) GetAll() ([]models.Event, error) {
 	return items, nil
 }
 
+func (e EventPostgres) Delete(id int) error {
+	query := fmt.Sprintf(`DELETE FROM %s WHERE event_id = $1`, volsAndEvents)
+
+	rows, err := e.db.Query(query, id)
+
+	if err != nil {
+		return err
+	}
+
+	err = rows.Close()
+
+	if err != nil {
+		return err
+	}
+
+	query = fmt.Sprintf(`DELETE FROM %s WHERE id = $1`, eventsTable)
+
+	rows, err = e.db.Query(query, id)
+
+	if err != nil {
+		return err
+	}
+
+	err = rows.Close()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (e EventPostgres) GetVolEvents(volId int) ([]models.Event, error) {
 	var items []models.Event
 

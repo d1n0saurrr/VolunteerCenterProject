@@ -1,0 +1,115 @@
+{{ define "events" }}
+
+{{ template "header" }}
+
+<title>Мероприятия</title>
+
+<style>
+    #zatemnenie:target {
+        display: block;
+    }
+
+    #zatemnenie {
+        background: rgba(102, 102, 102, 0.68);
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: none;
+        z-index: 9999;
+    }
+
+    window {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: fit-content;
+        height: fit-content;
+        border-radius: 3px;
+        transform: translate(-50%,-50%);
+        box-shadow: 0 12px 20px -10px;
+        padding: 20px;
+        background-color: #fafafa;
+    }
+
+    div#main_text a.close_window {
+        position: absolute;
+        right: 10px;
+        top: 4px;
+        border: none;
+    }
+</style>
+
+<script>
+    function hide(id, date) {
+        let now = new Date();
+        let endDate = new Date(date);
+
+        if (now > endDate)
+        {
+            document.getElementById('available' + id).hidden = true;
+            document.getElementById('ended' + id).hidden = false;
+        }
+    }
+
+    function deleteById(id) {
+        fetch("/admin/events/delete?id=" + id, {
+            method: 'post',
+            redirect: 'follow'
+        }).then(response => {
+            if (response.redirected)
+                window.location.href = response.url
+        })
+    }
+</script>
+
+<body>
+    <button onclick="location.hash ='zatemnenie'" style="margin-left: 0.5%; margin-top: 4.5%"
+            class="btn btn-primary btn-rounded">Добавить мероприятие</button>
+    <div id="zatemnenie">
+        <window>
+            <form action="/admin/events/add" method="post">
+                <div class="card text-center">
+                    <div class="card-header">Новое мероприятие</div>
+                    <div class="card-body">
+                        <label class="form-label">Название</label>
+                        <h5 class="card-title"> <input name="name" type="text" class="form-control"> </h5>
+                        <label class="form-label">Описание</label>
+                        <textarea name="description" rows="2" cols="40" class="form-control"></textarea>
+                        <label class="form-label">Локация</label>
+                        <input name="location" type="text" class="form-control">
+                        <label class="form-label">Даты проведения</label>
+                        <h5 class="card-text"> <input name="start_date" type="date" class="form-control-lg"> - <input name="end_date" type="date"  class="form-control-lg"> </h5>
+                        <p><a href="#" class="btn btn-outline-danger btn-rounded close_window">Отменить</a>
+                            <button type="submit" class="btn btn-primary btn-rounded close_window">Добавить</button></p>
+                    </div>
+                </div>
+            </form>
+        </window>
+    </div>
+    <div style="margin: 1% 1% 0 1%" class="row row-cols-1 row-cols-md-3 g-4">
+        {{ range . }}
+        <div class="col">
+            <div class="card h-100 text-center">
+                <div id="available{{ .Id }}" class="card-header text-success">Доступно</div>
+                <div hidden id="ended{{ .Id }}" class="card-header text-danger">Мероприятие закончилось</div>
+                <script>
+                    hide('{{ .Id }}', '{{ .EndDate }}')
+                </script>
+                <div class="card-body">
+                    <h4 class="card-title"> {{ .Name }} </h4>
+                    <p class="card-text"> {{ .Description }} </p>
+                    <h6 class="card-text">Локация: {{ .Location }} </h6>
+                    <button onclick="deleteById('{{ .Id }}')" style="margin-top: 2%" class="btn btn-danger">Удалить</button>
+                </div>
+                <div class="card-footer text-muted">{{ .Start }} - {{ .End }} </div>
+            </div>
+        </div>
+        {{ end }}
+    </div>
+</body>
+
+</html>
+
+{{ end }}

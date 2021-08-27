@@ -56,26 +56,4 @@
     <!-- Navbar -->
 </header>
 
-<script>
-    function authModule() {
-        const authOrigins = ["http://localhost:8080"];
-        let token = '';
-
-        this.setToken = (value) => {
-            token = value
-        }
-
-        this.fetch = (resource, options) => {
-            let req = new Request(resource, options);
-            destOrigin = new URL(req.url).origin;
-            if (token && authOrigins.includes(destOrigin)) {
-                req.headers.set("Authorization", "Bearer " + token);
-            }
-            return fetch(req)
-        }
-    }
-
-    const auth = new authModule();
-</script>
-
 {{ end }}

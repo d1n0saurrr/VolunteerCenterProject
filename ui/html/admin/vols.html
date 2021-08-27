@@ -1,0 +1,68 @@
+{{ define "vols" }}
+
+{{ template "header" }}
+
+<title>Волонтеры</title>
+
+<script>
+    function check(id, isAdmin) {
+        document.getElementById('isAdmin' + id).checked = isAdmin
+    }
+
+    function uncheck(id) {
+        fetch("/admin/vols/change?id=" + id, {
+            method: 'post',
+            redirect: 'follow'
+        })
+    }
+
+    function deleteById(id) {
+        fetch("/admin/events/delete?id=" + id, {
+            method: 'post',
+            redirect: 'follow'
+        }).then(response => {
+            if (response.redirected)
+                window.location.href = response.url
+        })
+    }
+</script>
+
+<body>
+    <table style=" margin: 5% 2% 2% 2%" class="table align-middle table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Username</th>
+            <th scope="col">Фамилия</th>
+            <th scope="col">Имя</th>
+            <th scope="col">Отчество</th>
+            <th scope="col">Администратор</th>
+            <th scope="col">Удалить</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{ range . }}
+        <tr>
+            <td>{{ .User.Username }}</td>
+            <td>{{ .Vol.FirstName }}</td>
+            <td>{{ .Vol.SecondName }}</td>
+            <td>{{ .Vol.Patronymic }}</td>
+            <td>
+                <div class="form-check">
+                    <input id="isAdmin{{ .User.Id }}" onclick="uncheck({{ .User.Id }})" class="form-check-input" type="checkbox" id="flexCheckDefault" />
+                    <script>
+                        check({{ .User.Id }}, {{ .User.IsAdmin.Bool }})
+                    </script>
+                </div>
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger btn-sm px-3"><i class="fas fa-times"></i></button>
+            </td>
+        </tr>
+        {{ end }}
+        </tbody>
+    </table>
+</body>
+
+</html>
+
+{{ end }}

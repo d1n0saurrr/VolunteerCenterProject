@@ -27,6 +27,7 @@ type Volunteer interface {
 type Event interface {
 	Create(event models.Event) (int, error)
 	GetAll() ([]models.Event, error)
+	Delete(id int) error
 	GetVolEvents(volId int) ([]models.Event, error)
 	RegisterVol(volId int, eventId int) error
 }

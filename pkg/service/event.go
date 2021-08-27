@@ -21,6 +21,10 @@ func (e EventService) GetAll() ([]models.Event, error) {
 	return e.repo.GetAll()
 }
 
+func (e EventService) Delete(id int) error {
+	return e.repo.Delete(id)
+}
+
 func (e EventService) GetVolEvents(volId int) ([]models.Event, error) {
 	return e.repo.GetVolEvents(volId)
 }

@@ -36,6 +36,8 @@ func (h *WebHandler) userIdentity(c *gin.Context) {
 func (h *WebHandler) adminIdentity(c *gin.Context) {
 	isAdmin, ok := c.Get(userAdmin)
 
+	h.header = "ui/html/adminHeader.html"
+
 	if !ok || !isAdmin.(bool) {
 		newErrorResponse(c, http.StatusBadGateway, "not admin")
 	}
