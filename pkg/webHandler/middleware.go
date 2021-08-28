@@ -31,14 +31,14 @@ func (h *WebHandler) userIdentity(c *gin.Context) {
 
 	c.Set(userCtx, userId)
 	c.Set(userAdmin, isAdmin)
+	//h.header = "ui/html/header.html"
 }
 
 func (h *WebHandler) adminIdentity(c *gin.Context) {
 	isAdmin, ok := c.Get(userAdmin)
 
-	h.header = "ui/html/adminHeader.html"
-
 	if !ok || !isAdmin.(bool) {
 		newErrorResponse(c, http.StatusBadGateway, "not admin")
 	}
+	//h.header = "ui/html/adminHeader.html"
 }

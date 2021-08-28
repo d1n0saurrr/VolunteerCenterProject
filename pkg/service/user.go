@@ -28,3 +28,11 @@ func (u UserService) GetAll() ([]models.User, error) {
 func (u UserService) SetVolId(userId, volId int) error {
 	return u.repo.SetVolId(userId, volId)
 }
+
+func (u UserService) Delete(id int) error {
+	return u.repo.Delete(id)
+}
+
+func (u UserService) Update(user models.User) error {
+	return u.repo.Update(user)
+}

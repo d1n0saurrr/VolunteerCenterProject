@@ -28,3 +28,7 @@ func (v VolService) GetById(id int) (models.Volunteer, error) {
 func (v VolService) GetAll() ([]models.Volunteer, error) {
 	return v.repo.GetAll()
 }
+
+func (v VolService) Delete(id int) error {
+	return v.repo.Delete(id)
+}

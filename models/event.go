@@ -11,4 +11,5 @@ type Event struct {
 	EndDate     time.Time `json:"end_date" db:"end_date"`
 	Start       string    `json:"start"`
 	End         string    `json:"end"`
+	Visited     bool      `json:"visited"`
 }

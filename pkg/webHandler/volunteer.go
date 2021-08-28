@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"html/template"
 	"net/http"
+	"strconv"
 )
 
 type VolInfo struct {
@@ -54,9 +55,65 @@ func (h *WebHandler) getAllVols(c *gin.Context) {
 }
 
 func (h *WebHandler) changeVol(c *gin.Context) {
+	id, err := strconv.Atoi(c.Query("id"))
 
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	user, err := h.services.User.GetById(id)
+
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = user.IsAdmin.Scan(!user.IsAdmin.Bool)
+
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = h.services.User.Update(user)
+
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/vols")
 }
 
-func (h *WebHandler) getVolById(c *gin.Context) {
+func (h *WebHandler) deleteVol(c *gin.Context) {
+	userId, err := strconv.Atoi(c.Query("userId"))
 
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	volId, err := strconv.Atoi(c.Query("volId"))
+
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = h.services.User.Delete(userId)
+
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = h.services.Volunteer.Delete(volId)
+
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/vols")
 }

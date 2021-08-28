@@ -54,12 +54,16 @@
     }
 
     function deleteById(id) {
-        fetch("/admin/events/delete?id=" + id, {
+        fetch("/admin/events/register?id=" + id, {
             method: 'post',
             redirect: 'follow'
         }).then(response => {
             if (response.redirected)
                 window.location.href = response.url
+            else
+                return response.text()
+        }).then((html) => {
+            document.body.innerText = html
         })
     }
 </script>

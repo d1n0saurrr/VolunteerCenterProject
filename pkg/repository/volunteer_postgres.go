@@ -10,6 +10,10 @@ type VolPostgres struct {
 	db *sqlx.DB
 }
 
+func NewVolPostgres(db *sqlx.DB) *VolPostgres {
+	return &VolPostgres{db: db}
+}
+
 func (v VolPostgres) Create(volunteer models.Volunteer) (int, error) {
 	var id int
 	query := fmt.Sprintf("INSERT INTO %s (first_name, second_name, patronymic, birth_date) "+
@@ -54,6 +58,18 @@ func (v VolPostgres) GetAll() ([]models.Volunteer, error) {
 	return items, nil
 }
 
-func NewVolPostgres(db *sqlx.DB) *VolPostgres {
-	return &VolPostgres{db: db}
+func (v VolPostgres) Delete(id int) error {
+	query := fmt.Sprintf(`DELETE FROM %s WHERE vol_id = $1`, volsAndEvents)
+
+	if _, err := v.db.Query(query, id); err != nil {
+		return err
+	}
+
+	query = fmt.Sprintf(`DELETE FROM %s WHERE id = $1`, volsTable)
+
+	if _, err := v.db.Query(query, id); err != nil {
+		return err
+	}
+
+	return nil
 }

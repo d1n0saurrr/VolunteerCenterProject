@@ -6,11 +6,15 @@ import (
 	"net/http"
 )
 
-const (
-	footer = 0
-)
-
 func (h *WebHandler) mainPage(c *gin.Context) {
+	isAdmin, _ := c.Get(userAdmin)
+
+	if isAdmin != nil && isAdmin.(bool) {
+		h.header = "ui/html/adminHeader.html"
+	} else if isAdmin != nil && !isAdmin.(bool) {
+		h.header = "ui/html/header.html"
+	}
+
 	t, err := template.ParseFiles("ui/html/main.html", h.header)
 
 	if err != nil {

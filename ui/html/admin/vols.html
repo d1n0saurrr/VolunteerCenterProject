@@ -4,30 +4,136 @@
 
 <title>Волонтеры</title>
 
+<style>
+    #zatemnenie:target {
+        display: block;
+    }
+
+    #zatemnenie {
+        background: rgba(102, 102, 102, 0.68);
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: none;
+        z-index: 9999;
+    }
+
+    window {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: fit-content;
+        height: fit-content;
+        border-radius: 3px;
+        transform: translate(-50%,-50%);
+        box-shadow: 0 12px 20px -10px;
+        padding: 20px;
+        background-color: #fafafa;
+    }
+
+    div#main_text a.close_window {
+        position: absolute;
+        right: 10px;
+        top: 4px;
+        border: none;
+    }
+</style>
+
 <script>
     function check(id, isAdmin) {
         document.getElementById('isAdmin' + id).checked = isAdmin
     }
 
-    function uncheck(id) {
+    function processCheck(id) {
         fetch("/admin/vols/change?id=" + id, {
-            method: 'post',
-            redirect: 'follow'
-        })
-    }
-
-    function deleteById(id) {
-        fetch("/admin/events/delete?id=" + id, {
             method: 'post',
             redirect: 'follow'
         }).then(response => {
             if (response.redirected)
                 window.location.href = response.url
+            else
+                return response.text()
+        }).then((html) => {
+            document.body.innerText = html
         })
+    }
+
+    function deleteById(userId, volId) {
+        fetch("/admin/vols/delete?userId=" + userId + "&volId=" + volId, {
+            method: 'post',
+            redirect: 'follow'
+        }).then(response => {
+            if (response.redirected)
+                window.location.href = response.url
+            else
+                return response.text()
+        }).then((html) => {
+            document.body.innerText = html
+        })
+    }
+
+    function clicked(id) {
+        let body = document.getElementById("tableBody");
+        body.innerHTML = "";
+
+        fetch("/admin/events/get_by_vol?id=" + id)
+            .then(response => {
+                return response.text()
+            }).then(json => {
+                let jsonData = JSON.parse(json);
+                for (let event of jsonData.events)
+                {
+                    let row = body.insertRow()
+                    row.insertCell().appendChild(document.createTextNode(event.name))
+                    row.insertCell().appendChild(document.createTextNode(event.description))
+                    row.insertCell().appendChild(document.createTextNode(event.start))
+                    row.insertCell().appendChild(document.createTextNode(event.end))
+                    console.log(event.name);
+                }
+            })
+    }
+
+    function parseDate(date, id) {
+        function join(t, a, s) {
+            function format(m) {
+                let f = new Intl.DateTimeFormat('en', m);
+                return f.format(t);
+            }
+            return a.map(format).join(s);
+        }
+
+        let a = [{day: 'numeric'}, {month: '2-digit'}, {year: 'numeric'}];
+        document.getElementById("date" + id).firstChild.nodeValue = join(new Date(date), a, '.')
     }
 </script>
 
 <body>
+    <div id="zatemnenie">
+        <window>
+            <form action="/admin/events/add" method="post">
+                <div class="card text-center">
+                    <div class="card-header">Мероприятия волонтера</div>
+                    <div class="card-body">
+                        <table id="tablee" style=" margin: 5% 2% 2% 2%" class="table align-middle table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Название</th>
+                                    <th scope="col">Локация</th>
+                                    <th scope="col">Начало</th>
+                                    <th scope="col">Конец</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
+                        <p><a href="#" class="btn btn-outline-success btn-rounded close_window">Закрыть</a></p>
+                    </div>
+                </div>
+            </form>
+        </window>
+    </div>
+
     <table style=" margin: 5% 2% 2% 2%" class="table align-middle table-hover">
         <thead>
         <tr>
@@ -35,27 +141,28 @@
             <th scope="col">Фамилия</th>
             <th scope="col">Имя</th>
             <th scope="col">Отчество</th>
+            <th scope="col">Дата рождения</th>
             <th scope="col">Администратор</th>
             <th scope="col">Удалить</th>
         </tr>
         </thead>
         <tbody>
         {{ range . }}
-        <tr>
+        <tr ondblclick="location.hash ='zatemnenie'; clicked({{ .Vol.Id }})">
             <td>{{ .User.Username }}</td>
             <td>{{ .Vol.FirstName }}</td>
             <td>{{ .Vol.SecondName }}</td>
             <td>{{ .Vol.Patronymic }}</td>
+            <td id="date{{ .Vol.Id }}">{{ .Vol.BirthDate }}</td>
+            <script> parseDate({{ .Vol.BirthDate }}, {{ .Vol.Id }}) </script>
             <td>
                 <div class="form-check">
-                    <input id="isAdmin{{ .User.Id }}" onclick="uncheck({{ .User.Id }})" class="form-check-input" type="checkbox" id="flexCheckDefault" />
-                    <script>
-                        check({{ .User.Id }}, {{ .User.IsAdmin.Bool }})
-                    </script>
+                    <input id="isAdmin{{ .User.Id }}" onclick="processCheck({{ .User.Id }})" class="form-check-input" type="checkbox" id="flexCheckDefault" />
+                    <script> check({{ .User.Id }}, {{ .User.IsAdmin.Bool }}) </script>
                 </div>
             </td>
             <td>
-                <button type="button" class="btn btn-danger btn-sm px-3"><i class="fas fa-times"></i></button>
+                <button onclick="deleteById({{ .User.Id }}, {{ .Vol.Id }})" type="button" class="btn btn-danger btn-sm px-3"><i class="fas fa-times"></i></button>
             </td>
         </tr>
         {{ end }}

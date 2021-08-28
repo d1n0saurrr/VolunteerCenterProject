@@ -2,12 +2,18 @@ package repository
 
 import (
 	"VolunteerCenter/models"
+	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
+	"time"
 )
 
 type EventPostgres struct {
 	db *sqlx.DB
+}
+
+func NewEventPostgres(db *sqlx.DB) *EventPostgres {
+	return &EventPostgres{db: db}
 }
 
 func (e EventPostgres) Create(event models.Event) (int, error) {
@@ -26,9 +32,21 @@ func (e EventPostgres) Create(event models.Event) (int, error) {
 func (e EventPostgres) GetAll() ([]models.Event, error) {
 	var items []models.Event
 
-	query := fmt.Sprintf(`SELECT * FROM %s`, eventsTable)
+	query := fmt.Sprintf(`SELECT * FROM %s ORDER BY end_date DESC`, eventsTable)
 
 	if err := e.db.Select(&items, query); err != nil {
+		return items, err
+	}
+
+	return items, nil
+}
+
+func (e EventPostgres) GetNew() ([]models.Event, error) {
+	var items []models.Event
+
+	query := fmt.Sprintf(`SELECT * FROM %s WHERE end_date >= $1 ORDER BY end_date DESC`, eventsTable)
+
+	if err := e.db.Select(&items, query, time.Now()); err != nil {
 		return items, err
 	}
 
@@ -70,7 +88,9 @@ func (e EventPostgres) Delete(id int) error {
 func (e EventPostgres) GetVolEvents(volId int) ([]models.Event, error) {
 	var items []models.Event
 
-	query := fmt.Sprintf(`SELECT * FROM %s WHERE vol_id = $1`, volsAndEvents)
+	query := fmt.Sprintf(`SELECT id, name, description, start_date, end_date
+		FROM %s JOIN %s ON %s.event_id = %s.id
+		WHERE vol_id = $1`, volsAndEvents, eventsTable, volsAndEvents, eventsTable)
 
 	if err := e.db.Select(&items, query, volId); err != nil {
 		return items, err
@@ -79,13 +99,36 @@ func (e EventPostgres) GetVolEvents(volId int) ([]models.Event, error) {
 	return items, nil
 }
 
-func (e EventPostgres) RegisterVol(volId int, eventId int) error {
-	query := fmt.Sprintf("INSERT INTO %s (vol_id, event_id) VALUES ($1, $2))", volsAndEvents)
-	row := e.db.QueryRow(query, volId, eventId)
+func (e EventPostgres) GetOldVolEvents(volId int) ([]models.Event, error) {
+	var items []models.Event
 
-	return row.Err()
+	query := fmt.Sprintf(`SELECT id, name, description, start_date, end_date
+		FROM %s JOIN %s ON %s.event_id = %s.id
+		WHERE vol_id = $1 AND end_date < $2
+		ORDER BY end_date DESC`, volsAndEvents, eventsTable, volsAndEvents, eventsTable)
+
+	if err := e.db.Select(&items, query, volId, time.Now()); err != nil {
+		return items, err
+	}
+
+	return items, nil
 }
 
-func NewEventPostgres(db *sqlx.DB) *EventPostgres {
-	return &EventPostgres{db: db}
+func (e EventPostgres) RegisterVol(volId int, eventId int) error {
+	var count []int
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE vol_id = $1 AND event_id = $2", volsAndEvents)
+	err := e.db.Select(&count, query, volId, eventId)
+
+	if err != nil {
+		return err
+	}
+
+	if count[0] != 0 {
+		return errors.New("can't register twice volunteer to event")
+	}
+
+	query = fmt.Sprintf("INSERT INTO %s VALUES ($1, $2)", volsAndEvents)
+	_, err = e.db.Query(query, volId, eventId)
+
+	return err
 }

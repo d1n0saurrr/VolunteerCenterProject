@@ -1,0 +1,28 @@
+{{ define "oldEvents" }}
+
+{{ template "header" }}
+
+<title>Посещенные мероприятия</title>
+
+<body style="margin-top: 5%">
+<div style="margin: 1% 1% 0 1%" class="row row-cols-1 row-cols-md-3 g-4">
+    {{ range . }}
+    <div class="col">
+        <div class="card h-100 text-center">
+            <div id="registered{{ .Id }}" class="card-header text-success">Посещено</div>
+            <div class="card-body">
+                <h4 class="card-title"> {{ .Name }} </h4>
+                <p class="card-text"> {{ .Description }} </p>
+                <h6 class="card-text">Локация: {{ .Location }} </h6>
+                <button disabled style="margin-top: 2%" class="btn btn-success">Записаться</button>
+            </div>
+            <div class="card-footer text-muted">{{ .Start }} - {{ .End }} </div>
+        </div>
+    </div>
+    {{ end }}
+</div>
+</body>
+
+</html>
+
+{{ end }}

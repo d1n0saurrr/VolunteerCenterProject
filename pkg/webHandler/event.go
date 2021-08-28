@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"html/template"
 	"net/http"
-	"sort"
 	"strconv"
 	"time"
 )
@@ -33,10 +32,6 @@ func (h *WebHandler) getEvents(c *gin.Context) {
 		events[i].Start = events[i].StartDate.Format("02.01.2006")
 		events[i].End = events[i].EndDate.Format("02.01.2006")
 	}
-
-	sort.Slice(events, func(i, j int) bool {
-		return events[i].StartDate.Before(events[j].StartDate)
-	})
 
 	if t.ExecuteTemplate(c.Writer, "events", events) != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -93,4 +88,29 @@ func (h *WebHandler) deleteEvent(c *gin.Context) {
 	}
 
 	c.Redirect(http.StatusFound, "/admin/events")
+}
+
+func (h *WebHandler) getVolEvents(c *gin.Context) {
+	id, err := strconv.Atoi(c.Query("id"))
+
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	events, err := h.services.Event.GetVolEvents(id)
+
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	for i := 0; i < len(events); i++ {
+		events[i].Start = events[i].StartDate.Format("02.01.2006")
+		events[i].End = events[i].EndDate.Format("02.01.2006")
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"events": events,
+	})
 }

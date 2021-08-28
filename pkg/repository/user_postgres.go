@@ -2,6 +2,7 @@ package repository
 
 import (
 	"VolunteerCenter/models"
+	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 )
@@ -12,6 +13,26 @@ type UserPostgres struct {
 
 func NewUserPostgres(db *sqlx.DB) *UserPostgres {
 	return &UserPostgres{db: db}
+}
+
+func (u UserPostgres) Update(user models.User) error {
+	isLastAdmin, err := u.isLastAdmin(user.Id)
+
+	if err != nil {
+		return err
+	}
+
+	if isLastAdmin {
+		return errors.New("can't delete last admin")
+	}
+
+	query := fmt.Sprintf("UPDATE %s SET is_Admin = $1 WHERE id = $2", usersTable)
+
+	if _, err := u.db.Query(query, user.IsAdmin, user.Id); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (u UserPostgres) GetById(id int) (models.User, error) {
@@ -64,4 +85,50 @@ func (u UserPostgres) SetVolId(userId, volId int) error {
 	}
 
 	return nil
+}
+
+func (u UserPostgres) Delete(id int) error {
+	isLastAdmin, err := u.isLastAdmin(id)
+
+	if err != nil {
+		return err
+	}
+
+	if isLastAdmin {
+		return errors.New("can't delete last admin")
+	}
+
+	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1`, usersTable)
+
+	_, err = u.db.Query(query, id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *UserPostgres) isLastAdmin(id int) (bool, error) {
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE is_admin = true", usersTable)
+	var counts []int
+	var ids []int
+
+	if err := u.db.Select(&counts, query); err != nil {
+		return false, err
+	}
+
+	if counts[0] == 1 {
+		query = fmt.Sprintf("SELECT id FROM %s WHERE is_admin = true", usersTable)
+
+		if err := u.db.Select(&ids, query); err != nil {
+			return false, err
+		}
+
+		if ids[0] == id {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

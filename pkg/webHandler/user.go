@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"html/template"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -93,13 +94,124 @@ func (h *WebHandler) changeUserInfo(c *gin.Context) {
 }
 
 func (h *WebHandler) getNewEvents(c *gin.Context) {
+	t, err := template.ParseFiles("ui/html/user/newEvents.html", h.header)
 
-}
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
 
-func (h *WebHandler) registerToEvent(c *gin.Context) {
+	events, err := h.services.Event.GetNew()
 
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	id, ok := c.Get(userCtx)
+
+	if !ok {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	user, err := h.services.User.GetById(id.(int))
+
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	visited, err := h.services.Event.GetVolEvents(user.IdVolunteer)
+
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	for i := 0; i < len(events); i++ {
+		for j := 0; j < len(visited); j++ {
+			if events[i].Id == visited[j].Id {
+				events[i].Visited = true
+				break
+			}
+		}
+	}
+
+	for i := 0; i < len(events); i++ {
+		events[i].Start = events[i].StartDate.Format("02.01.2006")
+		events[i].End = events[i].EndDate.Format("02.01.2006")
+	}
+
+	if t.ExecuteTemplate(c.Writer, "newEvents", events) != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
 }
 
 func (h *WebHandler) getVisitedEvents(c *gin.Context) {
+	t, err := template.ParseFiles("ui/html/user/oldEvents.html", h.header)
 
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	id, ok := c.Get(userCtx)
+
+	if !ok {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	user, err := h.services.User.GetById(id.(int))
+
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	visited, err := h.services.Event.GetOldVolEvents(user.IdVolunteer)
+
+	for i := 0; i < len(visited); i++ {
+		visited[i].Start = visited[i].StartDate.Format("02.01.2006")
+		visited[i].End = visited[i].EndDate.Format("02.01.2006")
+	}
+
+	if t.ExecuteTemplate(c.Writer, "oldEvents", visited) != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+}
+
+func (h *WebHandler) registerToEvent(c *gin.Context) {
+	eventId, err := strconv.Atoi(c.Query("id"))
+
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	userId, ok := c.Get(userCtx)
+
+	if !ok {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	user, err := h.services.User.GetById(userId.(int))
+
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = h.services.Event.RegisterVol(user.IdVolunteer, eventId)
+
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/events/new")
 }

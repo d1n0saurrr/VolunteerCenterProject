@@ -53,7 +53,7 @@ func (h *WebHandler) InitRoutes() *gin.Engine {
 		{
 			vols.GET("/", h.getAllVols)
 			vols.POST("/change", h.changeVol)
-			vols.GET("/:id", h.getVolById)
+			vols.POST("/delete", h.deleteVol)
 		}
 
 		events := admin.Group("/events")
@@ -61,6 +61,7 @@ func (h *WebHandler) InitRoutes() *gin.Engine {
 			events.GET("/", h.getEvents)
 			events.POST("/add", h.addEvent)
 			events.POST("/delete", h.deleteEvent)
+			events.GET("/get_by_vol", h.getVolEvents)
 		}
 	}
 

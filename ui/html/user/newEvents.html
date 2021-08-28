@@ -1,0 +1,57 @@
+{{ define "newEvents" }}
+
+{{ template "header" }}
+
+<title>Новые мероприятия</title>
+
+<script>
+    function hide(id, isRegistered) {
+        if (isRegistered == true)
+        {
+            document.getElementById('registerButton' + id).disabled = true;
+            document.getElementById('available' + id).hidden = true;
+            document.getElementById('registered' + id).hidden = false;
+        }
+    }
+
+    function register(id) {
+        fetch("/events/register?id=" + id, {
+            method: 'post',
+            redirect: 'follow'
+        }).then(response => {
+            if (response.redirected)
+                window.location.href = response.url
+            else
+                return response.text()
+        }).then((html) => {
+            document.body.innerText = html
+        })
+    }
+</script>
+
+<body style="margin-top: 5%">
+<div style="margin: 1% 1% 0 1%" class="row row-cols-1 row-cols-md-3 g-4">
+    {{ range . }}
+    <div class="col">
+        <div class="card h-100 text-center">
+            <div id="available{{ .Id }}" class="card-header text-success">Доступно</div>
+            <div hidden id="registered{{ .Id }}" class="card-header text-danger">Вы уже зарегистрированы</div>
+            <div class="card-body">
+                <h4 class="card-title"> {{ .Name }} </h4>
+                <p class="card-text"> {{ .Description }} </p>
+                <h6 class="card-text">Локация: {{ .Location }} </h6>
+                <button id="registerButton{{ .Id }}" onclick="register({{ .Id }})" style="margin-top: 2%" class="btn btn-success">Записаться</button>
+            </div>
+            <script>
+                hide({{ .Id }}, {{ .Visited }})
+            </script>
+            <div class="card-footer text-muted">{{ .Start }} - {{ .End }} </div>
+        </div>
+    </div>
+    {{ end }}
+</div>
+</body>
+
+</html>
+
+{{ end }}

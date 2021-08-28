@@ -15,7 +15,9 @@ type User interface {
 	GetById(id int) (models.User, error)
 	GetByUsername(username string) (models.User, error)
 	GetAll() ([]models.User, error)
+	Update(user models.User) error
 	SetVolId(userId, volId int) error
+	Delete(id int) error
 }
 
 type Volunteer interface {
@@ -23,13 +25,16 @@ type Volunteer interface {
 	Update(volunteer models.Volunteer) error
 	GetById(id int) (models.Volunteer, error)
 	GetAll() ([]models.Volunteer, error)
+	Delete(id int) error
 }
 
 type Event interface {
 	Create(event models.Event) (int, error)
 	GetAll() ([]models.Event, error)
+	GetNew() ([]models.Event, error)
 	Delete(id int) error
 	GetVolEvents(volId int) ([]models.Event, error)
+	GetOldVolEvents(volId int) ([]models.Event, error)
 	RegisterVol(volId int, eventId int) error
 }
 
